@@ -3,3 +3,5 @@ const Errors = {
     REDIS_ERR:1,
     EXCEPTION:2,
 }
+
+module.exports = {Errors}

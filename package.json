@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "serve": "node server.cjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "outoflu",
@@ -11,6 +12,8 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.10.6",
     "@grpc/proto-loader": "^0.7.12",
-    "nodemailer": "^6.9.13"
+    "nodemailer": "^6.9.13",
+    "path": "^0.12.7",
+    "uuid": "^9.0.1"
   }
 }

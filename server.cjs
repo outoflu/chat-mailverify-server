@@ -4,6 +4,7 @@ const message_proto = require('./proto.cjs')
 const const_module = require('./const.cjs')
 const { v4: uuidv4 } = require('uuid');
 const emailModule = require('./email.cjs')
+const redis_module=require('./redis.cjs')
 
 
 /**
@@ -15,12 +16,24 @@ const emailModule = require('./email.cjs')
 async function GetVarifyCode(call, callback) {
     console.log("email is ", call.request.email)
     try{
-        
-        let uniqueId = uuidv4();
-        if (uniqueId.length > 4) {
-            uniqueId = uniqueId.substring(0, 4);
-        } 
-
+        let query_res=await redis_module.GetRedis(const_module.code_pref+call.request.email);
+        console.log("query_res is",query_res);
+        let uniqueId=query_res;
+        if (query_res==null){
+            let uniqueId = uuidv4();
+            if (uniqueId.length > 4) {
+                uniqueId = uniqueId.substring(0, 4);
+            }
+            let bres=await redis_module.SetRedisExpire(const_module.code_pref+call.request.mail,uniqueId,600);
+            if (!bres){
+                callback(null,{
+                    email:call.request.email,
+                    error:const_module.Errors.REDIS_ERR
+                });
+                return;
+            }
+        }
+         
         console.log("uniqueId is ", uniqueId)
         let text_str =  '您的验证码为'+ uniqueId +'请三分钟内完成注册'
         //发送邮件

@@ -5,7 +5,13 @@ const const_module = require('./const.cjs')
 const { v4: uuidv4 } = require('uuid');
 const emailModule = require('./email.cjs')
 const redis_module=require('./redis.cjs')
+const config_module=require('./config.cjs')
 
+/*
+function KeyFromEmail(email){
+    return config_module.code_prefix.concat(email);
+}
+*/
 
 /**
  * GetVarifyCode grpc响应获取验证码的服务
@@ -14,20 +20,22 @@ const redis_module=require('./redis.cjs')
  * @returns 
  */
 async function GetVarifyCode(call, callback) {
-    console.log("email is ", call.request.email)
+    console.log("email is ", call.request.email);
+    let key=String(config_module.code_prefix).concat(call.request.email);
+    console.log(key);
     try{
-        let query_res=await redis_module.GetRedis(const_module.code_pref+call.request.email);
+        let query_res=await redis_module.GetRedis(key);
         console.log("query_res is",query_res);
         let uniqueId=query_res;
-        if (query_res==null){
-            let uniqueId = uuidv4();
+        if (uniqueId==null){
+            uniqueId = uuidv4();
             if (uniqueId.length > 4) {
                 uniqueId = uniqueId.substring(0, 4);
             }
-            let bres=await redis_module.SetRedisExpire(const_module.code_pref+call.request.mail,uniqueId,600);
+            let bres=await redis_module.SetRedisExpire(key,uniqueId,600);
             if (!bres){
                 callback(null,{
-                    email:call.request.email,
+                    email:key,
                     error:const_module.Errors.REDIS_ERR
                 });
                 return;
@@ -47,15 +55,15 @@ async function GetVarifyCode(call, callback) {
         let send_res = await emailModule.SendMail(mailOptions);
         console.log("send res is ", send_res)
 
-        callback(null, { email:  call.request.email,
-            error:const_module.Errors.Success
+        callback(null, { email: key,
+            error:const_module.Errors.SUCCESS
         }); 
         
  
     }catch(error){
         console.log("catch error is ", error)
 
-        callback(null, { email:  call.request.email,
+        callback(null, { email:  key,
             error:const_module.Errors.EXCEPTION
         }); 
     }

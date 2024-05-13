@@ -7,7 +7,7 @@ const emailModule = require('./email.cjs')
 const redis_module=require('./redis.cjs')
 const config_module=require('./config.cjs')
 
-/*
+/* 想要加密在这里修修改改就行了
 function KeyFromEmail(email){
     return config_module.code_prefix.concat(email);
 }
